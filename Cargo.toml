@@ -1,0 +1,11 @@
+[package]
+name = "rato"
+version = "0.1.0"
+authors = ["Rohit Joshi <rohit.c.joshi@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+log = "*"
+
+[dev-dependencies]
+env_logger = { version = "0.6.0", default-features = false }
