@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/../bhatho/bhatho.iml" filepath="$PROJECT_DIR$/../bhatho/bhatho.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../gadu/gadu.iml" filepath="$PROJECT_DIR$/../gadu/gadu.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../kanudo/kanudo.iml" filepath="$PROJECT_DIR$/../kanudo/kanudo.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../kanudo_db/kanudo_db.iml" filepath="$PROJECT_DIR$/../kanudo_db/kanudo_db.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../lalo/lalo.iml" filepath="$PROJECT_DIR$/../lalo/lalo.iml" />
+      <module fileurl="file://$PROJECT_DIR$/rato.iml" filepath="$PROJECT_DIR$/rato.iml" />
+      <module fileurl="file://$USER_HOME$/Downloads/turing-db/turing-db.iml" filepath="$USER_HOME$/Downloads/turing-db/turing-db.iml" />
+    </modules>
+  </component>
+</project>

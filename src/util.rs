@@ -9,7 +9,7 @@ pub struct RedisUtil {}
 impl RedisUtil {
 
 
-
+    #[inline]
     pub fn redcon_take_args(input: &[u8], ni: usize) -> (Vec<Vec<u8>>, String, usize, bool) {
         if input.len() > ni {
             if input[ni] == b'*' {
@@ -76,14 +76,7 @@ impl RedisUtil {
         resp
     }
 
-    #[inline]
-    pub fn pub_sub_cmd(channels: Vec<&str>) -> Vec<u8> {
-        let mut output = RedisUtil::make_array(channels.len());
-        for val in channels {
-            output.extend(RedisUtil::make_bulk(&val.as_bytes()));
-        }
-        output
-    }
+
 
     pub fn make_array(count: usize) -> Vec<u8> {
         let mut resp = Vec::new();
