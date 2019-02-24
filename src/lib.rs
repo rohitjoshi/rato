@@ -5,7 +5,6 @@ pub mod util;
 pub mod redis_cmd;
 pub mod rato;
 
-use std::collections::HashMap;
 
 #[cfg(test)]
 mod tests {

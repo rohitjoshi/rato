@@ -1,8 +1,7 @@
 use std::collections::HashMap;
 use crate::util::RedisUtil;
 use crate::redis_cmd::RedisCommand;
-use std::marker::PhantomData;
-use std::sync::Arc;
+
 
 pub struct Rato {
 
@@ -71,7 +70,7 @@ impl Rato {
             for args in argss {
                 let mut close_session = false;
                 //let (hout, write, hclose) = handle_command_dummy(&args);
-                let hout = Rato::handle_command( event_handler, &mut conn_tags, &args, close_session);
+                let hout = Rato::handle_command( event_handler, &mut conn_tags, &args, &mut close_session);
 
 
                 output.extend_from_slice(hout.as_slice());
@@ -105,29 +104,29 @@ impl Rato {
     }
 
 
-     fn handle_command<T>(event_handler: &T, mut conn_tags: &mut HashMap<String,String>,
-        args: &Vec<Vec<u8>>,
-        mut close_session: bool
+     fn handle_command<T>(event_handler: &T, conn_tags: &mut HashMap<String,String>,
+        args: &[Vec<u8>],
+        close_session: &mut bool
 
     ) -> Vec<u8> where T: ?Sized + RedisCommand{
 
 
          let db_tag = conn_tags.get(Rato::DB_TAG);
 
-         let mut db = vec![];
-         if db_tag.is_some() {
-             db = db_tag.unwrap().as_bytes().to_vec();
-         }
+         let db = if db_tag.is_some() {
+             db_tag.unwrap().as_bytes().to_vec()
+         }else {
+             vec![]
+         };
 
 
          let mut authorize_access = false;
 
-         let mut auth_status = conn_tags.get(Rato::AUTH_TAG);
+         let auth_status = conn_tags.get(Rato::AUTH_TAG);
 
 
-         if RedisUtil::arg_match(&args[0], "AUTH") {
-             authorize_access = true;
-         }else if auth_status.is_some() && auth_status.unwrap() == "true" {
+         if RedisUtil::arg_match(&args[0], "AUTH") ||
+             (auth_status.is_some() && auth_status.unwrap() == "true") {
              authorize_access = true;
          }
          if !authorize_access {
@@ -158,7 +157,7 @@ impl Rato {
              match args.len() {
                  2 => {
                      conn_tags.insert(Rato::DB_TAG.to_string(), String::from_utf8_lossy(&args[1]).to_string());
-                     return b"+OK\r\n".to_vec();
+                     b"+OK\r\n".to_vec()
 
                  },
                  _ => RedisUtil::invalid_num_args(&args[0])
@@ -263,7 +262,7 @@ impl Rato {
              (
                  match args.len() {
                      1 => {
-                         if let Err(e) = event_handler.on_cmd_backupdb(&vec![]) {
+                         if let Err(e) = event_handler.on_cmd_backupdb(&[]) {
                              format!(
                                  "-ERR Backup DB Failed '{}'\r\n",
                                  e.to_string()
@@ -292,7 +291,7 @@ impl Rato {
              (
                  match args.len() {
                      1 => {
-                         if let Err(e) = event_handler.on_cmd_backup_lru_keys(&vec![]) {
+                         if let Err(e) = event_handler.on_cmd_backup_lru_keys(&[]) {
                              format!(
                                  "-ERR BACKUP_LRU_KEYS Lru Keys Failed '{}'\r\n",
                                  e.to_string()
@@ -319,7 +318,7 @@ impl Rato {
          } else if RedisUtil::arg_match(&args[0], "DEL") {
             match args.len() {
                 2 => {
-                    if let Err(e) =   event_handler.on_cmd_del(&db,&args[1]) {
+                    if let Err(_e) =   event_handler.on_cmd_del(&db,&args[1]) {
                         b":0\r\n".to_vec()
                     }else {
                         b":1\r\n".to_vec()
@@ -415,10 +414,10 @@ impl Rato {
                 .to_vec()
 
         } else if RedisUtil::arg_match(&args[0], "QUIT") {
-            if let Err(e) =   event_handler.on_cmd_quit() {
+            if let Err(_e) =   event_handler.on_cmd_quit() {
                 b":0\r\n".to_vec()
             }else {
-                close_session = true;
+                *close_session = true;
                 b"+OK\r\n".to_vec()
             }
         } else if RedisUtil::arg_match(&args[0], "MESSAGE") {
@@ -426,7 +425,7 @@ impl Rato {
             match args.len() {
                 1 | 2 => RedisUtil::invalid_num_args(&args[0]),
                 _ => {
-                    if let Err(e) =   event_handler.on_cmd_msg(&args[1], &args[2]) {
+                    if let Err(_e) =   event_handler.on_cmd_msg(&args[1], &args[2]) {
                         vec![]
                     }else {
                         vec![]
@@ -437,7 +436,7 @@ impl Rato {
         } else if RedisUtil::arg_match(&args[0], "SUBSCRIBE") {
             match args.len() {
                 3 => {
-                    if let Err(e) =   event_handler.on_cmd_subscribe(&args[1]) {
+                    if let Err(_e) =   event_handler.on_cmd_subscribe(&args[1]) {
                         vec![]
                     }else {
                         vec![]
@@ -447,7 +446,7 @@ impl Rato {
                     for arg in args.iter() {
                         debug!("Subscription response: {}", String::from_utf8_lossy(&arg));
                     }
-                    if let Err(e) =   event_handler.on_cmd_subscribe_response(&args[1], &args[2]) {
+                    if let Err(_e) =   event_handler.on_cmd_subscribe_response(&args[1], &args[2]) {
                         vec![]
                     }else {
                         vec![]

@@ -32,11 +32,11 @@ impl RedisUtil {
     #[inline]
     pub fn safe_line_from_slice(s: &[u8]) -> String {
         let mut out = Vec::new();
-        for i in 0..s.len() {
-            if s[i] < b' ' {
+        for c in s {
+            if *c < b' ' {
                 out.push(b' ')
             } else {
-                out.push(s[i]);
+                out.push(*c);
             }
         }
         String::from_utf8_lossy(out.as_slice()).to_string()
