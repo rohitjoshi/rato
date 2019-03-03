@@ -3,9 +3,17 @@ name = "rato"
 version = "0.1.0"
 authors = ["Rohit Joshi <rohit.c.joshi@gmail.com>"]
 edition = "2018"
+description = "Redis protocol parsing library"
+keywords=["redis", "protocol"]
+License="Apache 2.0"
+license-file="LICENSE"
+
+[badges]
+travis-ci = { repository = "https://github.com/rohitjoshi/rato", branch = "master" }
+codecov = { repository = "https://github.com/rohitjoshi/rato", branch = "master", service = "github" }
 
 [dependencies]
-log = "*"
+log = "0.4.6"
 hashbrown = "0.1.8"
 
 [dev-dependencies]
