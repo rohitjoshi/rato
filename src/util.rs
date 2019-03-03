@@ -1,4 +1,3 @@
-
 ///
 /// Some of the Code copied from: https://github.com/tidwall/cache-server
 /// Copy right for copied code: Josh Baker @tidwall,  MIT License
@@ -7,8 +6,6 @@
 pub struct RedisUtil {}
 
 impl RedisUtil {
-
-
     #[inline]
     pub fn redcon_take_args(input: &[u8], ni: usize) -> (Vec<Vec<u8>>, String, usize, bool) {
         if input.len() > ni {
@@ -21,8 +18,6 @@ impl RedisUtil {
             (Vec::default(), String::default(), ni, false)
         }
     }
-
-
 
     #[inline]
     pub fn safe_line_from_string(s: &str) -> String {
@@ -61,8 +56,6 @@ impl RedisUtil {
         true
     }
 
-
-
     #[inline]
     pub fn make_bulk(bulk: &[u8]) -> Vec<u8> {
         let mut resp = Vec::with_capacity(bulk.len() + 10);
@@ -75,8 +68,6 @@ impl RedisUtil {
         resp.push(b'\n');
         resp
     }
-
-
 
     pub fn make_array(count: usize) -> Vec<u8> {
         let mut resp = Vec::new();
@@ -96,10 +87,10 @@ impl RedisUtil {
         format!(
             "-ERR wrong number of arguments for '{}' command\r\n",
             String::from_utf8_lossy(&cmd)
-        ).into_bytes()
-            .to_vec()
+        )
+        .into_bytes()
+        .to_vec()
     }
-
 
     pub fn redcon_take_multibulk_args(
         input: &[u8],
@@ -147,44 +138,44 @@ impl RedisUtil {
                                     //next_index += 1;
                                     match String::from_utf8_lossy(&input[s + 1..i - 1])
                                         .parse::<usize>()
-                                        {
-                                            Ok(nbytes) => {
-                                                debug!("nbytes:{}", nbytes, );
-                                                if response_flag {
-                                                    debug!("response_flag is true");
-                                                    let bin = input[s + 1..i - 1].to_vec();
-                                                    let response_status_len = bin.len();
+                                    {
+                                        Ok(nbytes) => {
+                                            debug!("nbytes:{}", nbytes,);
+                                            if response_flag {
+                                                debug!("response_flag is true");
+                                                let bin = input[s + 1..i - 1].to_vec();
+                                                let response_status_len = bin.len();
+                                                debug!(
+                                                    "Adding to args: {}",
+                                                    String::from_utf8_lossy(&bin)
+                                                );
+                                                i = i + 1 + bin.len() + 2;
+                                                args.push(bin);
+                                                debug!("args len: {}", response_status_len);
+                                            } else {
+                                                if input.len() < i + 1 + nbytes + 2 {
                                                     debug!(
-                                                        "Adding to args: {}",
-                                                        String::from_utf8_lossy(&bin)
-                                                    );
-                                                    i = i + 1 + bin.len() + 2;
-                                                    args.push(bin);
-                                                    debug!("args len: {}", response_status_len);
-                                                } else {
-                                                    if input.len() < i + 1 + nbytes + 2 {
-                                                        debug!(
                                                             "Break in input.len() < i + 1 + nbytes + 2. Remaning payload:{}",
                                                             String::from_utf8_lossy(&input[s + 1..])
                                                         );
-                                                        return (args, err, i, false);
-                                                        //break;
-                                                    }
-                                                    let bin = input[i + 1..i + 1 + nbytes].to_vec();
-                                                    debug!(
-                                                        "Adding to args: {}",
-                                                        String::from_utf8_lossy(&bin)
-                                                    );
-                                                    args.push(bin);
-                                                    debug!("args len: {}", args.len());
-                                                    i = i + 1 + nbytes + 2;
+                                                    return (args, err, i, false);
+                                                    //break;
                                                 }
-                                            }
-                                            Err(_) => {
-                                                err = "invalid bulk length".to_string();
-                                                error!("Redis parse error: {}", err);
+                                                let bin = input[i + 1..i + 1 + nbytes].to_vec();
+                                                debug!(
+                                                    "Adding to args: {}",
+                                                    String::from_utf8_lossy(&bin)
+                                                );
+                                                args.push(bin);
+                                                debug!("args len: {}", args.len());
+                                                i = i + 1 + nbytes + 2;
                                             }
                                         }
+                                        Err(_) => {
+                                            err = "invalid bulk length".to_string();
+                                            error!("Redis parse error: {}", err);
+                                        }
+                                    }
                                     break;
                                 }
                                 i += 1;
@@ -276,7 +267,8 @@ impl RedisUtil {
                             b'a' => arg.push(0x07),
                             b'x' => {
                                 let is_hex = |b: u8| -> bool {
-                                    (b >= b'0' && b <= b'9') || (b >= b'a' && b <= b'f')
+                                    (b >= b'0' && b <= b'9')
+                                        || (b >= b'a' && b <= b'f')
                                         || (b >= b'A' && b <= b'F')
                                 };
                                 let hex_to_digit = |b: u8| -> u8 {
@@ -288,15 +280,16 @@ impl RedisUtil {
                                         b - b'a' + 10
                                     }
                                 };
-                                if packet.len() - (i + 1) >= 2 && is_hex(packet[i + 1])
+                                if packet.len() - (i + 1) >= 2
+                                    && is_hex(packet[i + 1])
                                     && is_hex(packet[i + 2])
-                                    {
-                                        arg.push(
-                                            hex_to_digit(packet[i + 1])
-                                                << (4 + hex_to_digit(packet[i + 2])),
-                                        );
-                                        i += 2
-                                    } else {
+                                {
+                                    arg.push(
+                                        hex_to_digit(packet[i + 1])
+                                            << (4 + hex_to_digit(packet[i + 2])),
+                                    );
+                                    i += 2
+                                } else {
                                     arg.push(b'x')
                                 }
                             }
