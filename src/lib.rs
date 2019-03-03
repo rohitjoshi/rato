@@ -15,6 +15,7 @@ mod tests {
     use crate::rato::Rato;
 
     use std::sync::Arc;
+    use hashbrown::HashMap;
 
 
 
@@ -126,12 +127,13 @@ mod tests {
         let _ = env_logger::try_init();
 
         let redis_test = RedisTest {};
-        let redis_test= Arc::new(redis_test);
+        //let redis_test= Arc::new(redis_test);
 
         //let mut mulo = Rato::<RedisTest>::new(redis_test);
 
         let mut tags: HashMap<String,String> = HashMap::with_capacity(1);
         tags.insert(Rato::DB_TAG.to_string(), "pan".to_string());
+
 
         let res = Rato::parse_input( &redis_test, &mut tags, &mut b"AUTH secret\r\n".to_vec());
         assert_eq!(String::from_utf8_lossy(&res.0), "+OK\r\n");
@@ -147,10 +149,11 @@ mod tests {
         let _ = env_logger::try_init();
 
         let redis_test = RedisTest {};
-        let redis_test= Arc::new(redis_test);
+        //let redis_test= Arc::new(redis_test);
 
         let mut tags: HashMap<String,String> = HashMap::with_capacity(1);
         tags.insert(Rato::DB_TAG.to_string(), "pan".to_string());
+        tags.insert(Rato::AUTH_TAG.to_string(), "true".to_string());
 
         //let mut mulo = Rato::<RedisTest>::new(redis_test);
 
@@ -168,10 +171,11 @@ mod tests {
         let _ = env_logger::try_init();
 
         let redis_test = RedisTest {};
-        let redis_test= Arc::new(redis_test);
+        //let redis_test= Arc::new(redis_test);
 
         let mut tags: HashMap<String,String> = HashMap::with_capacity(1);
         tags.insert(Rato::DB_TAG.to_string(), "pan".to_string());
+        tags.insert(Rato::AUTH_TAG.to_string(), "true".to_string());
 
         //let mut mulo = Rato::<RedisTest>::new(redis_test);
 
@@ -188,10 +192,12 @@ mod tests {
         let _ = env_logger::try_init();
 
         let redis_test = RedisTest {};
-        let redis_test= Arc::new(redis_test);
+        //let redis_test= Arc::new(redis_test);
 
         let mut tags: HashMap<String,String> = HashMap::with_capacity(1);
         tags.insert(Rato::DB_TAG.to_string(), "pan".to_string());
+        tags.insert(Rato::AUTH_TAG.to_string(), "true".to_string());
+
 
         //let mut mulo = Rato::<RedisTest>::new(redis_test);
 
@@ -207,9 +213,10 @@ mod tests {
         let _ = env_logger::try_init();
 
         let redis_test = RedisTest {};
-        let redis_test= Arc::new(redis_test);
+        //let redis_test= Arc::new(redis_test);
 
         let mut tags: HashMap<String,String> = HashMap::with_capacity(1);
+        tags.insert(Rato::AUTH_TAG.to_string(), "true".to_string());
         //tags.insert(Rato::DB_TAG.to_string(), "pan".to_string());
 
         //let mut mulo = Rato::<RedisTest>::new(redis_test);

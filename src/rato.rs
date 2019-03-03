@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use hashbrown::HashMap;
 use crate::util::RedisUtil;
 use crate::redis_cmd::RedisCommand;
 
@@ -27,81 +27,76 @@ impl Rato {
         output
     }
 
+        pub fn parse_input<T>(event_handler: &T, mut conn_tags: &mut HashMap<String,String>, input: &mut Vec<u8>)->(Vec<u8>, bool)
+            where T: ?Sized + RedisCommand {
+            let mut output = Vec::new();
+            let mut close = false;
+            let mut i = 0;
+            let mut argss = Vec::new();
+            debug!(
+                "Redis Command/Payload received: {}",
+                String::from_utf8_lossy(&input)
+            );
 
 
-
-
-        pub fn parse_input<T>(event_handler: &T, mut conn_tags: &mut HashMap<String,String>, input: &mut Vec<u8>)->(Vec<u8>, bool) where T: ?Sized + RedisCommand{
-        let mut output = Vec::new();
-        let mut close = false;
-        let mut i = 0;
-        let mut argss = Vec::new();
-        debug!(
-            "Redis Command/Payload received: {}",
-            String::from_utf8_lossy(&input)
-        );
-
-
-
-        loop {
-            let (args, err, ni, complete) = RedisUtil::redcon_take_args(input, i);
-            if err != "" {
-                output.extend(format!("-{}\r\n", err).into_bytes());
-                close = true;
-                error!(
-                    "Failed to parse redis response. Error:{}",
-                    String::from_utf8_lossy(&output)
-                );
-                break;
-            } else if !complete {
-                break;
-            }
-            i = ni;
-            if !args.is_empty() {
-                argss.push(args);
-            }
-        }
-
-        debug!("argss len:{}, close: {}", argss.len(), close);
-
-        if !close && !argss.is_empty() {
-            //let mut aof = Vec::new();
-            //let mut store = store.lock().unwrap();
-            for args in argss {
-                let mut close_session = false;
-                //let (hout, write, hclose) = handle_command_dummy(&args);
-                let hout = Rato::handle_command( event_handler, &mut conn_tags, &args, &mut close_session);
-
-
-                output.extend_from_slice(hout.as_slice());
-                if close_session {
+            loop {
+                let (args, err, ni, complete) = RedisUtil::redcon_take_args(input, i);
+                if err != "" {
+                    output.extend(format!("-{}\r\n", err).into_bytes());
                     close = true;
+                    error!(
+                        "Failed to parse redis response. Error:{}",
+                        String::from_utf8_lossy(&output)
+                    );
+                    break;
+                } else if !complete {
                     break;
                 }
+                i = ni;
+                if !args.is_empty() {
+                    argss.push(args);
+                }
+            }
 
+            debug!("argss len:{}, close: {}", argss.len(), close);
+
+            if !close && !argss.is_empty() {
+                //let mut aof = Vec::new();
+                //let mut store = store.lock().unwrap();
+                for args in argss {
+                    let mut close_session = false;
+                    //let (hout, write, hclose) = handle_command_dummy(&args);
+                    let hout = Rato::handle_command(event_handler, &mut conn_tags, &args, &mut close_session);
+
+
+                    output.extend_from_slice(hout.as_slice());
+                    if close_session {
+                        close = true;
+                        break;
+                    }
+                }
+                // if aof.len() > 0 {
+                //     // FUTURE: persist to disk
+                // }
             }
-            // if aof.len() > 0 {
-            //     // FUTURE: persist to disk
-            // }
-        }
-        if i > 0 {
-            if i < input.len() {
-                let mut remain = Vec::with_capacity(input.len() - i);
-                remain.extend_from_slice(&input[i..input.len()]);
-                debug!("Remaning buffer:{}", String::from_utf8_lossy(&remain));
-                input.clear();
-                input.extend(remain)
-            } else {
-                input.clear()
+            if i > 0 {
+                if i < input.len() {
+                    let mut remain = Vec::with_capacity(input.len() - i);
+                    remain.extend_from_slice(&input[i..input.len()]);
+                    debug!("Remaning buffer:{}", String::from_utf8_lossy(&remain));
+                    input.clear();
+                    input.extend(remain)
+                } else {
+                    input.clear()
+                }
             }
+            // (output, close)
+            debug!(
+                "Redis Command response: {}",
+                String::from_utf8_lossy(&output)
+            );
+            (output, close)
         }
-        // (output, close)
-        debug!(
-            "Redis Command response: {}",
-            String::from_utf8_lossy(&output)
-        );
-        (output, close)
-    }
 
 
      fn handle_command<T>(event_handler: &T, conn_tags: &mut HashMap<String,String>,

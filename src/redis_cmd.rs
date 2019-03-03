@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use hashbrown::HashMap;
 pub trait RedisCommand {
     fn on_cmd_ping(&self,key: &[u8]);
     fn on_cmd_echo(&self,val: &[u8]);

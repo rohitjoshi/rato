@@ -6,7 +6,7 @@ edition = "2018"
 
 [dependencies]
 log = "*"
-
+hashbrown = "0.1.8"
 
 [dev-dependencies]
 env_logger = { version = "0.6.0", default-features = false }
