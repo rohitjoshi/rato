@@ -96,7 +96,7 @@ impl RedisUtil {
         input: &[u8],
         ni: usize,
     ) -> (Vec<Vec<u8>>, String, usize, bool) {
-        debug!("redcon_take_multibulk_args()");
+        trace!("redcon_take_multibulk_args()");
         let mut err = String::default();
         let mut complete = false;
         let mut args: Vec<Vec<u8>> = Vec::new();
@@ -106,11 +106,11 @@ impl RedisUtil {
             if input[i - 1] == b'\r' && input[i] == b'\n' {
                 match String::from_utf8_lossy(&input[s + 1..i - 1]).parse::<usize>() {
                     Ok(nargs) => {
-                        debug!("nargs:{}", nargs);
+                        trace!("nargs:{}", nargs);
                         i += 1;
                         complete = nargs == 0;
                         for ag in 0..nargs {
-                            debug!("ag:{}", ag);
+                            trace!("ag:{}", ag);
                             s = i;
                             while i < input.len() {
                                 if input[i - 1] == b'\r' && input[i] == b'\n' {
@@ -140,21 +140,21 @@ impl RedisUtil {
                                         .parse::<usize>()
                                     {
                                         Ok(nbytes) => {
-                                            debug!("nbytes:{}", nbytes,);
+                                            trace!("nbytes:{}", nbytes,);
                                             if response_flag {
-                                                debug!("response_flag is true");
+                                                trace!("response_flag is true");
                                                 let bin = input[s + 1..i - 1].to_vec();
                                                 let response_status_len = bin.len();
-                                                debug!(
+                                                trace!(
                                                     "Adding to args: {}",
                                                     String::from_utf8_lossy(&bin)
                                                 );
                                                 i = i + 1 + bin.len() + 2;
                                                 args.push(bin);
-                                                debug!("args len: {}", response_status_len);
+                                                trace!("args len: {}", response_status_len);
                                             } else {
                                                 if input.len() < i + 1 + nbytes + 2 {
-                                                    debug!(
+                                                    trace!(
                                                             "Break in input.len() < i + 1 + nbytes + 2. Remaning payload:{}",
                                                             String::from_utf8_lossy(&input[s + 1..])
                                                         );
@@ -162,12 +162,12 @@ impl RedisUtil {
                                                     //break;
                                                 }
                                                 let bin = input[i + 1..i + 1 + nbytes].to_vec();
-                                                debug!(
+                                                trace!(
                                                     "Adding to args: {}",
                                                     String::from_utf8_lossy(&bin)
                                                 );
                                                 args.push(bin);
-                                                debug!("args len: {}", args.len());
+                                                trace!("args len: {}", args.len());
                                                 i = i + 1 + nbytes + 2;
                                             }
                                         }
@@ -185,7 +185,7 @@ impl RedisUtil {
                                 break;
                             }
                             if args.len() == nargs {
-                                debug!(
+                                trace!(
                                     "Complete true: args.len(): {} == nargs: {}",
                                     args.len(),
                                     nargs
@@ -212,7 +212,7 @@ impl RedisUtil {
                 RedisUtil::safe_line_from_string(&err)
             )
         }
-        debug!(
+        trace!(
             "Returning args leng:{}, err:{}, i:{}, complete:{}",
             args.len(),
             err,
