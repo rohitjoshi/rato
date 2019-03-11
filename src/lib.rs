@@ -47,18 +47,18 @@ mod tests {
         fn on_cmd_del(&self, db: &[u8], key: &[u8]) -> Result<(), String> {
             Err("Not implemented".to_string())
         }
-        fn on_cmd_get(&self, db: &[u8], key: &[u8]) -> Result<Vec<u8>, String> {
-            Ok(b"b".to_vec())
+        fn on_cmd_get(&self, db: &[u8], key: &[u8]) -> Result<Option<Vec<u8>>, String> {
+            Ok(Some(b"b".to_vec()))
         }
         fn on_cmd_hmget(
             &self,
             db: &[u8],
             hash: &[u8],
             keys: &[Vec<u8>],
-        ) -> Result<Vec<Vec<u8>>, String> {
+        ) -> Result<Option<Vec<Vec<u8>>>, String> {
             Err("Not implemented".to_string())
         }
-        fn on_cmd_hget(&self, db: &[u8], hash: &[u8], key: &[u8]) -> Result<Vec<u8>, String> {
+        fn on_cmd_hget(&self, db: &[u8], hash: &[u8], key: &[u8]) -> Result<Option<Vec<u8>>, String> {
             Err("Not implemented".to_string())
         }
         fn on_cmd_hgetall(

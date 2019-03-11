@@ -305,8 +305,9 @@ impl Rato {
                 2 => {
                     //return (RedisUtil::make_bulk(&b"abc".to_vec()), false, false);
                     match event_handler.on_cmd_get(&db, &args[1]) {
-                        Ok(v) => RedisUtil::make_bulk(&v),
-                        Err(_e) => {
+                        Ok(Some(v)) => RedisUtil::make_bulk(&v),
+
+                        _ => {
                             // error!("GET: Received error while getting from store for key: {}. Error:{}",String::from_utf8_lossy(&args[1]), e.to_string());
                             b"$-1\r\n".to_vec()
                         }
@@ -319,7 +320,7 @@ impl Rato {
                 1 | 2 => RedisUtil::invalid_num_args(&args[0]),
                 _ => {
                     match event_handler.on_cmd_hmget(&db, &args[1], &args[2..]) {
-                        Ok(v) => {
+                        Ok(Some(v)) => {
                             let mut output = RedisUtil::make_array(v.len());
                             for val in v {
                                 //output.extend(RedisUtil::make_bulk(&key));
@@ -328,7 +329,7 @@ impl Rato {
                             //RedisUtil::make_bulk(&output)
                             output
                         }
-                        Err(_e) => {
+                        _ => {
                             // error!("GET: Received error while getting from store for key: {}. Error:{}",String::from_utf8_lossy(&args[1]), e.to_string());
                             b"$-1\r\n".to_vec()
                         }
@@ -339,8 +340,8 @@ impl Rato {
             match args.len() {
                 3 => {
                     match event_handler.on_cmd_hget(&db, &args[1], &args[2]) {
-                        Ok(kv) => RedisUtil::make_bulk(&kv),
-                        Err(_e) => {
+                        Ok(Some(kv)) => RedisUtil::make_bulk(&kv),
+                        _ => {
                             // error!("GET: Received error while getting from store for key: {}. Error:{}",String::from_utf8_lossy(&args[1]), e.to_string());
                             b"$-1\r\n".to_vec()
                         }
@@ -352,7 +353,7 @@ impl Rato {
             match args.len() {
                 2 => {
                     match event_handler.on_cmd_hgetall(&db, &args[1]) {
-                        Ok(v) => {
+                        Ok(Some(v)) => {
                             let mut output = RedisUtil::make_array(v.len() * 2);
                             for (key, val) in v {
                                 output.extend(RedisUtil::make_bulk(&key));
@@ -361,7 +362,7 @@ impl Rato {
                             // RedisUtil::make_bulk(&output)
                             output
                         }
-                        Err(_e) => {
+                        _ => {
                             // error!("GET: Received error while getting from store for key: {}. Error:{}",String::from_utf8_lossy(&args[1]), e.to_string());
                             b"$-1\r\n".to_vec()
                         }
