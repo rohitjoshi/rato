@@ -5,6 +5,8 @@ pub mod rato;
 pub mod redis_cmd;
 pub mod util;
 
+
+
 #[cfg(test)]
 mod tests {
 
@@ -65,7 +67,7 @@ mod tests {
             &self,
             db: &[u8],
             hash: &[u8],
-        ) -> Result<HashMap<Vec<u8>, Vec<u8>>, String> {
+        ) -> Result<Option<Vec<Vec<u8>>>, String> {
             Err("Not implemented".to_string())
         }
         fn on_cmd_set(&self, db: &[u8], key: &[u8], val: &[u8]) -> Result<(), String> {
@@ -75,7 +77,7 @@ mod tests {
             &self,
             db: &[u8],
             hash: &[u8],
-            kv: &HashMap<&Vec<u8>, &Vec<u8>>,
+            kv:&[Vec<u8>],
         ) -> Result<(), String> {
             Err("Not implemented".to_string())
         }

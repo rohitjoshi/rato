@@ -12,9 +12,14 @@ license-file="LICENSE"
 travis-ci = { repository = "https://github.com/rohitjoshi/rato", branch = "master" }
 codecov = { repository = "https://github.com/rohitjoshi/rato", branch = "master", service = "github" }
 
-[dependencies]
-log = "0.4.6"
-hashbrown = "0.1.8"
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+incremental = false
 
-[dev-dependencies]
-env_logger = { version = "0.6.0", default-features = false }
+[dependencies]
+log = { version = "0.3", features = ["max_level_trace", "release_max_level_info"] }
+hashbrown = "0.1.8"
+rayon="1.0.3"
+

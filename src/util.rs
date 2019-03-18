@@ -10,9 +10,18 @@ impl RedisUtil {
     pub fn redcon_take_args(input: &[u8], ni: usize) -> (Vec<Vec<u8>>, String, usize, bool) {
         if input.len() > ni {
             if input[ni] == b'*' {
-                RedisUtil::redcon_take_multibulk_args(input, ni)
+                let (mut args, err, index, complete) = RedisUtil::redcon_take_multibulk_args(input, ni);
+                if !args.is_empty() {
+                    args[0].make_ascii_uppercase();
+                }
+                (args, err, index, complete)
+
             } else {
-                RedisUtil::redcon_take_inline_args(input, ni)
+                let (mut args, err, index, complete) = RedisUtil::redcon_take_inline_args(input, ni);
+                if !args.is_empty() {
+                    args[0].make_ascii_uppercase();
+                }
+                (args, err, index, complete)
             }
         } else {
             (Vec::default(), String::default(), ni, false)
@@ -58,6 +67,19 @@ impl RedisUtil {
 
     #[inline]
     pub fn make_bulk(bulk: &[u8]) -> Vec<u8> {
+        let mut resp = Vec::with_capacity(bulk.len() + 10);
+        resp.push(b'$');
+        resp.extend_from_slice(&bulk.len().to_string().into_bytes());
+        resp.push(b'\r');
+        resp.push(b'\n');
+        resp.extend(bulk);
+        resp.push(b'\r');
+        resp.push(b'\n');
+        resp
+    }
+
+    #[inline]
+    pub fn make_bulk_extend(bulk: Vec<u8>) -> Vec<u8> {
         let mut resp = Vec::with_capacity(bulk.len() + 10);
         resp.push(b'$');
         resp.extend_from_slice(&bulk.len().to_string().into_bytes());
