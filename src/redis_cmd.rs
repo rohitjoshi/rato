@@ -22,12 +22,7 @@ pub trait RedisCommand {
     fn on_cmd_hget(&self, db: &[u8], hash: &[u8], key: &[u8]) -> Result<Option<Vec<u8>>, String>;
     fn on_cmd_hgetall(&self, db: &[u8], hash: &[u8]) -> Result<Option<Vec<Vec<u8>>>, String>;
     fn on_cmd_set(&self, db: &[u8], key: &[u8], val: &[u8]) -> Result<(), String>;
-    fn on_cmd_hmset(
-        &self,
-        db: &[u8],
-        hash: &[u8],
-        kv: &[Vec<u8>],
-    ) -> Result<(), String>;
+    fn on_cmd_hmset(&self, db: &[u8], hash: &[u8], kv: &[Vec<u8>]) -> Result<(), String>;
     fn on_cmd_hset(&self, db: &[u8], hash: &[u8], key: &[u8], val: &[u8]) -> Result<(), String>;
 
     fn on_cmd_msg(&self, channel: &[u8], val: &[u8]) -> Result<(), String>;
@@ -39,4 +34,3 @@ pub trait RedisCommand {
     fn on_cmd_cluster_update_node(&self, kv: &HashMap<&Vec<u8>, &Vec<u8>>) -> Result<(), String>;
     fn on_cmd_cluster_remove_node(&self, id: &[u8]) -> Result<(), String>;
 }
-
