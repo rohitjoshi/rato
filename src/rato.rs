@@ -49,6 +49,7 @@ impl Rato {
     where
         T: ?Sized + Sync + RedisCommand,
     {
+        debug!("is_authorized_access");
         let mut authorize_access = false;
         if let Some(auth_status) = conn_tags.get(Rato::AUTH_TAG) {
             if auth_status == "true" {
@@ -64,6 +65,7 @@ impl Rato {
             let args = &argss[0];
             match args.len() {
                 2 => {
+                    debug!("Command AUTH received with password");
                     if let Err(e) = event_handler.on_cmd_auth(&db, &args[1]) {
                         conn_tags.insert(Rato::AUTH_TAG.to_string(), "false".to_string());
                         output.extend(
@@ -79,10 +81,27 @@ impl Rato {
                     argss.drain(0..1);
                 }
                 _ => {
+                    warn!("Unsupported command: {}", String::from_utf8_lossy(&args[0]));
                     output.extend(RedisUtil::invalid_num_args(&args[0]));
                     argss.drain(0..1);
                 }
             }
+        } else if !argss[0].is_empty() && !argss[0][0].is_empty() {
+            output.extend(
+                format!(
+                    "-ERR Command received {}. Must send AUTH command first\r\n",
+                    String::from_utf8_lossy(&argss[0][0])
+                )
+                .into_bytes()
+                .to_vec(),
+            );
+            argss.drain(0..1);
+        } else {
+            output.extend(
+                format!("-ERR Must send AUTH command first\r\n")
+                    .into_bytes()
+                    .to_vec(),
+            );
         }
         authorize_access
     }
@@ -92,7 +111,7 @@ impl Rato {
         conn_tags: &mut HashMap<String, String>,
         output: &mut Vec<u8>,
     ) -> (Vec<u8>, bool) {
-        if !argss[0].is_empty() && argss[0][0].as_slice() == b"SELECT" {
+        if !argss.is_empty() && !argss[0].is_empty() && argss[0][0].as_slice() == b"SELECT" {
             let args = &argss[0];
             match args.len() {
                 2 => {
@@ -170,11 +189,18 @@ impl Rato {
         if !argss.is_empty() {
             if !Rato::is_authorized_access(&mut argss, event_handler, conn_tags, output) {
                 warn!("Unauthorized access");
+                debug!(
+                    "Redis Command response: {}",
+                    String::from_utf8_lossy(&output)
+                );
+                input.clear();
                 return (false, total_commands); // close
             }
-            let (db_name, found_db) = Rato::process_db_tag(&mut argss, conn_tags, output);
-            if found_db {
-                db = db_name;
+            if !argss.is_empty() {
+                let (db_name, found_db) = Rato::process_db_tag(&mut argss, conn_tags, output);
+                if found_db {
+                    db = db_name;
+                }
             }
         }
 
@@ -559,7 +585,12 @@ impl Rato {
                                 }
                             }
                         } else {
-                            RedisUtil::invalid_num_args(&args[0])
+                            format!(
+                                "-ERR not supported command CLUSTER '{}'\r\n",
+                                RedisUtil::safe_line_from_slice(&args[1])
+                            )
+                            .into_bytes()
+                            .to_vec()
                         }
                     }
                     4 => {
